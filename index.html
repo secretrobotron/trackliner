@@ -1,39 +1,31 @@
-<script src="http://code.jquery.com/jquery-1.5.js"></script>
-<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.13/jquery-ui.js"></script>
-<link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.1/themes/base/jquery-ui.css"/>
+<html>
+  <head>
+    <script src="external/jquery.js"></script>
+    <script src="external/jquery-ui.js"></script>
+    <link rel="stylesheet" type="text/css" href="external/jquery-ui.css"/>
+    <script src="trackliner.js"></script>
+    <script>
 
+      document.addEventListener('DOMContentLoaded', function (e) {
+        var duration = 10; // seconds
 
-<script src="trackLiner.js"></script>
+        var trackline = new TrackLiner({
+          element: "container",
+          scale: 100, //pixels
+          duration: duration,
+        });
 
+        trackline.createTrack().createTrackEvent( { start: 1, end: 5 } );
+        trackline.createTrack().createTrackEvent( { start: 0, end: 2 } );
+        trackline.createTrack().createTrackEvent( { start: 4, end: 7 } );
+        trackline.createTrack();
 
+      }, false);
 
-  <div id="container" style="width: 9000px;">
-  </div>
-
-
-<script>
-
-  var duration = 190; // seconds
-
-  var trackLine = new TrackLiner( "container" ); //,
-
-  trackLine.plugin({
-    setup: function( popcornTrack, eventElement, trackElement ) {
-
-      eventElement.style.left = popcornTrack.start / duration * trackElement.offsetWidth + "px";
-      eventElement.style.width = ( popcornTrack.end - popcornTrack.start ) / duration * trackElement.offsetWidth + "px";
-    },
-    moved: function( popcornTrack, eventElement, trackElement ) {
-
-      popcornTrack.start = parseInt( eventElement.style.left, 10 ) / trackElement.offsetWidth * duration;
-      popcornTrack.end = ( parseInt( eventElement.style.left, 10 ) + eventElement.offsetWidth ) / trackElement.offsetWidth * duration;
-    }
-  });
-  trackLine.createTrack().createTrackEvent( { start: 1, end: 189 } );
-  trackLine.createTrack().createTrackEvent( { start: 1, end: 11 } );
-  trackLine.createTrack().createTrackEvent( { start: 10, end: 15 } );
-  trackLine.createTrack().createTrackEvent( { start: 5, end: 10 } );
-  trackLine.createTrack();
-
-</script>
-
+    </script>
+  <head>
+  <body>
+    <div id="container">
+    </div>
+  </body>
+</html>
