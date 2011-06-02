@@ -5,6 +5,10 @@
   var plugins = {};
 
   function addPlugin ( name, def ) {
+    def.setup = def.setup || function (){};
+    def.moved = def.moved || function (){};
+    def.click = def.click || function (){};
+    def.dblclick = def.dblclick || function (){};
     if ( name ) {
       plugins[name] = def;
     } //if
@@ -160,7 +164,7 @@
           if (pluginDef) {
 
             var trackOptions = plugins[ type ].setup( that, inputOptions );
-            var callback = function( event, ui ) {
+            var movedCallback = function( event, ui ) {
 
               var eventElement = ui.helper[ 0 ],
                   trackObject = self.getTrack( eventElement.parentNode.id ),
@@ -168,20 +172,26 @@
                   eventObject = trackObject.getTrackEvent( eventElement.id ).event;
 
               eventElement.style.top = "0px";
-              pluginDef.moved( eventObject, eventElement, trackElement );
+              pluginDef.moved.apply( trackEvent, [event, ui] );
             };
 
             trackEvent.event = event;
             trackEvent.element = trackOptions.element || this.createEventElement ( trackOptions );
             trackEvent.element.id = eventId;
+            trackEvent.element.addEventListener('click', function (e) {
+              pluginDef.click.apply(trackEvent, [e]);
+            }, false);
+            trackEvent.element.addEventListener('dblclick', function (e) {
+              pluginDef.dblclick.apply(trackEvent, [e]);
+            }, false);
             trackEvent.type = type;
             //trackEvent.element = element;
 
             $( trackEvent.element ).draggable( { /*grid: [ 1, 36 ],*/ containment: parent, zIndex: 9001, scroll: true,
               // this is when an event stops being dragged
-              stop: callback
+              stop: movedCallback
             }).resizable( { autoHide: true, containment: "parent", handles: 'e, w', scroll: false,
-              stop: callback
+              stop: movedCallback
             });
 
             this.addTrackEvent( trackEvent );
@@ -245,9 +255,14 @@
         width: width,
       };
     },
-    moved: function () {
+    moved: function (event, ui) {
+      console.log('moved!');
     },
-    click: function () {
+    click: function (event) {
+      console.log('click!');
+    },
+    dblclick: function (event) {
+      console.log('dblclick!');
     },
   });
 
