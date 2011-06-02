@@ -20,12 +20,30 @@
         trackline.createTrack().createTrackEvent( { start: 4, end: 7 } );
         trackline.createTrack();
 
+        var elems = document.getElementsByClassName('droppable');
+        for (var i=0; i<elems.length; ++i) {
+          $(elems[i]).draggable({
+            helper: 'clone',
+            revert: true,
+            revertDuration: 0,
+          });
+        } //for
+
       }, false);
 
     </script>
-  <head>
+    <style>
+      .droppable {
+        cursor: pointer;
+      }
+    </style>
+  </head>
   <body>
-    <div id="container">
+    <div id="container" style="height: 50%;">
+    </div>
+    <div id="droppables">
+      <div class="droppable" data-trackliner-type="droppable1">Droppable 1</div>
+      <div class="droppable" data-trackliner-type="droppable2">Droppable 2</div>
     </div>
   </body>
 </html>

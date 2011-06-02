@@ -44,7 +44,7 @@
           if ( ui.draggable[ 0 ].className.indexOf( "ui-draggable" ) > -1 ) {
   
             var eventId = ui.draggable[ 0 ].id,
-                type = ui.draggable[ 0].getAttribute('data-type') || 'default',
+                type = ui.draggable[ 0].getAttribute('data-trackliner-type') || 'default',
                 parentId = ui.draggable[ 0 ].parentNode.id,
                 newTrack = self.createTrack();
 
@@ -108,7 +108,9 @@
         element.style.position = "relative";
         element.id = trackId;
 
-        $( element ).droppable( { greedy: true,
+        $( element ).droppable( { 
+          greedy: true,
+
           // this is dropping an event on a track
           drop: function( event, ui ) {
 
@@ -119,10 +121,11 @@
 
             if ( self.getTrack( parentId ) ) {
               self.getTrack( trackId ).addTrackEvent( self.getTrack( parentId ).removeTrackEvent( eventId ) );
-            } else {
+            }
+            else {
 
               if ( type && plugins[ type ]) {
-                self.getTrack( trackId ).createTrackEvent( type, {}, event, ui );
+                self.getTrack( trackId ).createTrackEvent( type, {left: event.clientX/scale}, event, ui );
               } //if
 
             } //if
@@ -130,9 +133,21 @@
         });
 
         this.getElement = function() {
-
           return element;
         };
+
+        this.createEventElement = function ( options ) {
+          var element = document.createElement('DIV');
+          element.style.cursor = options.cursor || "move";
+          element.style.background = options.backgroud || "-moz-linear-gradient(top,  #ff0,  #660)";
+          element.style.opacity = options.opacity || "0.5";
+          element.style.height = options.height || "100%";
+          element.style.width = options.width ? options.width*scale : "100px";
+          element.style.position = options.position || "absolute";
+          element.style.top = options.top || "0px";
+          element.style.left = options.left ? options.left*scale : "0px";
+          return element;
+        } //createEventElement
 
         this.createTrackEvent = function( type, inputOptions, event, ui ) {
 
@@ -157,15 +172,7 @@
             };
 
             trackEvent.event = event;
-            trackEvent.element = document.createElement( "div" );
-            trackEvent.element.style.cursor = "move";
-            trackEvent.element.style.background = "-moz-linear-gradient(top,  #ff0,  #660)";
-            trackEvent.element.style.opacity = "0.5";
-            trackEvent.element.style.height = "100%";
-            trackEvent.element.style.width = trackOptions.width ? trackOptions.width*scale + "px" : "100px";
-            trackEvent.element.style.position = "absolute";
-            trackEvent.element.style.top = "0px";
-            trackEvent.element.style.left = trackOptions.left ? trackOptions.left*scale + "px" : "0px";
+            trackEvent.element = trackOptions.element || this.createEventElement ( trackOptions );
             trackEvent.element.id = eventId;
             trackEvent.type = type;
             //trackEvent.element = element;
