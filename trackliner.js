@@ -172,17 +172,17 @@
                   eventObject = trackObject.getTrackEvent( eventElement.id ).event;
 
               eventElement.style.top = "0px";
-              pluginDef.moved.apply( trackEvent, [event, ui] );
+              pluginDef.moved( trackEvent, event, ui );
             };
 
             trackEvent.event = event;
             trackEvent.element = trackOptions.element || this.createEventElement ( trackOptions );
             trackEvent.element.id = eventId;
             trackEvent.element.addEventListener('click', function (e) {
-              pluginDef.click.apply(trackEvent, [e]);
+              pluginDef.click( trackEvent, e );
             }, false);
             trackEvent.element.addEventListener('dblclick', function (e) {
-              pluginDef.dblclick.apply(trackEvent, [e]);
+              pluginDef.dblclick( trackEvent, e );
             }, false);
             trackEvent.type = type;
             //trackEvent.element = element;
@@ -255,13 +255,13 @@
         width: width,
       };
     },
-    moved: function (event, ui) {
+    moved: function (trackEventObj, event, ui) {
       console.log('moved!');
     },
-    click: function (event) {
+    click: function (trackEventObj, event) {
       console.log('click!');
     },
-    dblclick: function (event) {
+    dblclick: function (trackEventObj, event) {
       console.log('dblclick!');
     },
   });
