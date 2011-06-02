@@ -20,6 +20,7 @@
         trackCount = 0,
         eventCount = 0,
         userElement,
+        dynamicTrackCreation = options.dynamicTrackCreation,
         duration = (options && options.duration) || 1,
         scale = (options && options.scale) || window.width/2,
         parent = document.createElement( "div" ),
@@ -45,7 +46,7 @@
         // this is dropping an event on empty space
         drop: function( event, ui ) {
   
-          if ( ui.draggable[ 0 ].className.indexOf( "ui-draggable" ) > -1 ) {
+          if ( dynamicTrackCreation && ui.draggable[ 0 ].className.indexOf( "ui-draggable" ) > -1 ) {
   
             var eventId = ui.draggable[ 0 ].id,
                 type = ui.draggable[ 0].getAttribute('data-trackliner-type') || 'default',
