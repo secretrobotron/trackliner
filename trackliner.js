@@ -62,11 +62,24 @@
         }
       });
 
-      this.createTrack = function() {
+      this.createTrack = function( name ) {
 
         //index = ~index || ~trackArray.length;
-        var track = new Track();
-        container.appendChild( track.getElement() );
+        var track = new Track(),
+            element = track.getElement();
+        
+        container.appendChild( element );
+
+        if ( name ) {
+          var titleElement = document.createElement('span');
+          titleElement.style.postion = 'absolute';
+          titleElement.style.left = '5px';
+          titleElement.style.top = '50%';
+          titleElement.innerHTML = name;
+          
+          element.appendChild( titleElement );
+        } //if
+
         tracks[ track.getElement().id ] = track;//.splice( ~index, 0, track );
         return track;
       };
