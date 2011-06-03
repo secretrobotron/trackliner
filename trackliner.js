@@ -134,7 +134,7 @@
 
             var eventId = ui.draggable[ 0 ].id,
                 trackId = this.id,
-                type = ui.draggable[ 0].getAttribute('data-type') || 'default',
+                type = ui.draggable[ 0].getAttribute('data-trackliner-type') || 'default',
                 parentId = ui.draggable[ 0 ].parentNode.id;
 
             if ( self.getTrack( parentId ) ) {
