@@ -178,7 +178,7 @@
               
           if (pluginDef) {
 
-            var trackOptions = plugins[ type ].setup( that, inputOptions );
+            var trackOptions = plugins[ type ].setup( that, inputOptions, event, ui );
             var movedCallback = function( event, ui ) {
 
               var eventElement = ui.helper[ 0 ],
@@ -262,7 +262,7 @@
   window.TrackLiner = TrackLiner;
 
   TrackLiner.plugin( 'default', {
-    setup: function ( track, options ) {
+    setup: function ( track, options, event, ui ) {
       var left = options.left || options.x || options.start || 0;
       var width = options.width || options.end ? options.end - left : 1;
       return {
