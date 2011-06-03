@@ -160,10 +160,10 @@
           element.style.background = options.backgroud || "-moz-linear-gradient(top,  #ff0,  #660)";
           element.style.opacity = options.opacity || "0.5";
           element.style.height = options.height || "100%";
-          element.style.width = options.width ? options.width*scale : "100px";
+          element.style.width = options.width ? options.width*scale + "px" : "100px";
           element.style.position = options.position || "absolute";
           element.style.top = options.top || "0px";
-          element.style.left = options.left ? options.left*scale : "0px";
+          element.style.left = options.left ? options.left*scale + "px" : "0px";
           return element;
         } //createEventElement
 
