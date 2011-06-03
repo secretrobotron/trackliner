@@ -21,6 +21,7 @@
         eventCount = 0,
         userElement,
         dynamicTrackCreation = options.dynamicTrackCreation,
+        restrictToKnownPlugins = options.restrictToKnownPlugins,
         duration = options && options.duration ? options.duration.duration : 1,
         scale = options && options.scale ? options.scale : 1,
         parent = document.createElement( "div" ),
@@ -49,7 +50,7 @@
           if ( dynamicTrackCreation && ui.draggable[ 0 ].className.indexOf( "ui-draggable" ) > -1 ) {
   
             var eventId = ui.draggable[ 0 ].id,
-                type = ui.draggable[ 0 ].getAttribute('data-trackliner-type') || 'default',
+                type = ui.draggable[ 0 ].getAttribute('data-trackliner-type'),
                 parentId = ui.draggable[ 0 ].parentNode.id,
                 newTrack = self.createTrack();
 
@@ -136,7 +137,7 @@
 
             var eventId = ui.draggable[ 0 ].id,
                 trackId = this.id,
-                type = ui.draggable[ 0 ].getAttribute('data-trackliner-type') || 'default',
+                type = ui.draggable[ 0 ].getAttribute('data-trackliner-type'),
                 parentId = ui.draggable[ 0 ].parentNode.id;
 
             if ( self.getTrack( parentId ) ) {
@@ -175,7 +176,7 @@
           var trackEvent = {},
               eventId = "trackEvent" + eventCount++,
               inputOptions = typeof(type) === 'string' ? inputOptions : type,
-              type = typeof(type) === 'string' ? type : 'default',
+              type = typeof(type) === 'string' ? type : (restrictToKnownPlugins ? undefined : 'default'),
               pluginDef = plugins[ type ];
               
           if (pluginDef) {
