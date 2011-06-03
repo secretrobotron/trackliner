@@ -164,6 +164,7 @@
           element.style.position = options.position || "absolute";
           element.style.top = options.top || "0px";
           element.style.left = options.left ? options.left*scale + "px" : "0px";
+          element.innerHTML = options.innerHTML || '';
           return element;
         } //createEventElement
 
@@ -267,6 +268,7 @@
       return {
         left: left,
         width: width,
+        innerHTML: options.label || '',
       };
     },
     moved: function (trackEventObj, event, ui) {
