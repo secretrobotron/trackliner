@@ -13,6 +13,7 @@
           element: "container",
           scale: 100, //pixels
           duration: duration,
+          dynamicTrackCreation: true,
         });
 
         trackline.createTrack('Track1').createTrackEvent( { start: 1, end: 5, label: 'awesome' } );
@@ -42,8 +43,8 @@
     <div id="container" style="height: 50%;">
     </div>
     <div id="droppables">
-      <div class="droppable" data-trackliner-type="droppable1">Droppable 1</div>
-      <div class="droppable" data-trackliner-type="droppable2">Droppable 2</div>
+      <div class="droppable" data-trackliner-type="default">Droppable 1</div>
+      <div class="droppable" data-trackliner-type="default">Droppable 2</div>
     </div>
   </body>
 </html>

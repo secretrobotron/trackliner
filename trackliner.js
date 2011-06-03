@@ -45,6 +45,7 @@
       $( parent ).droppable({
         // this is dropping an event on empty space
         drop: function( event, ui ) {
+          console.log('zoop');
   
           if ( dynamicTrackCreation && ui.draggable[ 0 ].className.indexOf( "ui-draggable" ) > -1 ) {
   
@@ -56,7 +57,9 @@
             if ( self.getTrack( parentId ) ) {
               newTrack.addTrackEvent( self.getTrack( parentId ).removeTrackEvent( eventId ) );
             } else {
-              newTrack.createTrackEvent( type, {}, event, ui );
+              var clientRects = parent.getClientRects();
+              console.log(event.clientX, scale, clientRects[0].left);
+              newTrack.createTrackEvent( type, { left: (event.clientX - clientRects[0].left)/scale }, event, ui );
             } //if
 
           } //if
