@@ -45,12 +45,11 @@
       $( parent ).droppable({
         // this is dropping an event on empty space
         drop: function( event, ui ) {
-          console.log('zoop');
   
           if ( dynamicTrackCreation && ui.draggable[ 0 ].className.indexOf( "ui-draggable" ) > -1 ) {
   
             var eventId = ui.draggable[ 0 ].id,
-                type = ui.draggable[ 0].getAttribute('data-trackliner-type') || 'default',
+                type = ui.draggable[ 0 ].getAttribute('data-trackliner-type') || 'default',
                 parentId = ui.draggable[ 0 ].parentNode.id,
                 newTrack = self.createTrack();
 
@@ -58,7 +57,6 @@
               newTrack.addTrackEvent( self.getTrack( parentId ).removeTrackEvent( eventId ) );
             } else {
               var clientRects = parent.getClientRects();
-              console.log(event.clientX, scale, clientRects[0].left);
               newTrack.createTrackEvent( type, { left: (event.clientX - clientRects[0].left)/scale }, event, ui );
             } //if
 
@@ -80,6 +78,7 @@
           titleElement.style.left = '5px';
           titleElement.style.top = '50%';
           titleElement.innerHTML = name;
+          titleElement.className = 'track-title';
           
           element.appendChild( titleElement );
         } //if
@@ -137,7 +136,7 @@
 
             var eventId = ui.draggable[ 0 ].id,
                 trackId = this.id,
-                type = ui.draggable[ 0].getAttribute('data-trackliner-type') || 'default',
+                type = ui.draggable[ 0 ].getAttribute('data-trackliner-type') || 'default',
                 parentId = ui.draggable[ 0 ].parentNode.id;
 
             if ( self.getTrack( parentId ) ) {
@@ -193,7 +192,7 @@
               pluginDef.moved( trackEvent, event, ui );
             };
 
-            trackEvent.event = event;
+            trackEvent.options = inputOptions;
             trackEvent.element = trackOptions.element || this.createEventElement ( trackOptions );
             trackEvent.element.id = eventId;
             trackEvent.element.addEventListener('click', function (e) {
@@ -203,10 +202,13 @@
               pluginDef.dblclick( trackEvent, e );
             }, false);
             trackEvent.type = type;
+            trackEvent.trackId = trackId;
             //trackEvent.element = element;
 
             $( trackEvent.element ).draggable( { /*grid: [ 1, 36 ],*/ containment: parent, zIndex: 9001, scroll: true,
               // this is when an event stops being dragged
+              start: function ( event, ui ) {
+              },
               stop: movedCallback
             }).resizable( { autoHide: true, containment: "parent", handles: 'e, w', scroll: false,
               stop: movedCallback
