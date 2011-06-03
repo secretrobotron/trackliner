@@ -21,8 +21,8 @@
         eventCount = 0,
         userElement,
         dynamicTrackCreation = options.dynamicTrackCreation,
-        duration = (options && options.duration) || 1,
-        scale = (options && options.scale) || window.width/2,
+        duration = options && options.duration ? options.duration.duration : 1,
+        scale = options && options.scale ? options.scale : 1,
         parent = document.createElement( "div" ),
         container = document.createElement( "div" ),
         self = this;
