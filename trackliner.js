@@ -182,6 +182,7 @@
           element.style.top = options.top || "0px";
           element.style.left = options.left ? options.left*scale + "px" : "0px";
           element.innerHTML = options.innerHTML || '';
+          element.className = options.className || '';
           return element;
         } //createEventElement
 
@@ -302,6 +303,7 @@
         left: left,
         width: width,
         innerHTML: options.label || '',
+        className: options.className || '',
       };
     },
     moved: function (trackEventObj, event, ui) {
