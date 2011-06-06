@@ -201,17 +201,17 @@
             var movedCallback = function( event, ui ) {
               var eventElement = trackEvent.element;
               eventElement.style.top = "0px";
-              pluginDef.moved( trackEvent, event, ui );
+              pluginDef.moved( that, trackEvent, event, ui );
             };
 
             trackEvent.options = inputOptions;
             trackEvent.element = trackOptions.element || this.createEventElement ( trackOptions );
             trackEvent.element.id = eventId;
             trackEvent.element.addEventListener('click', function (e) {
-              pluginDef.click( trackEvent, e );
+              pluginDef.click( that, trackEvent, e );
             }, false);
             trackEvent.element.addEventListener('dblclick', function (e) {
-              pluginDef.dblclick( trackEvent, e );
+              pluginDef.dblclick( that, trackEvent, e );
             }, false);
             trackEvent.type = type;
             //trackEvent.element = element;
@@ -220,12 +220,12 @@
             trackEvent.select = function (e) {
               self.deselectOthers();
               trackEvent.selected = true;
-              plugins[ type ].select(trackEvent, null);
+              plugins[ type ].select(that, trackEvent, null);
             };
 
             trackEvent.deselect = function (e) {
               trackEvent.selected = false;
-              plugins[ type ].deselect(trackEvent, null);
+              plugins[ type ].deselect(that, trackEvent, null);
             };
 
             $( trackEvent.element ).draggable( { /*grid: [ 1, 36 ],*/ containment: parent, zIndex: 9001, scroll: true,
@@ -306,17 +306,17 @@
         className: options.className || '',
       };
     },
-    moved: function (trackEventObj, event, ui) {
+    moved: function (track, trackEventObj, event, ui) {
     },
-    click: function (trackEventObj, event) {
+    click: function (track, trackEventObj, event) {
       trackEventObj.select();
     },
-    dblclick: function (trackEventObj, event) {
+    dblclick: function (track, trackEventObj, event) {
     },
-    select: function (trackEventObj, event) {
+    select: function (track, trackEventObj, event) {
       trackEventObj.element.style.background = "-moz-linear-gradient(top,  #0f0,  #060)";
     },
-    deselect: function (trackEventObj, event) {
+    deselect: function (track, trackEventObj, event) {
       trackEventObj.element.style.background = "-moz-linear-gradient(top,  #ff0,  #660)";
     },
   });
