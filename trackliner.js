@@ -192,7 +192,6 @@
         this.createTrackEvent = function( type, inputOptions, event, ui ) {
 
           var trackEvent = {},
-              that = this,
               eventId = "trackEvent" + eventCount++,
               inputOptions = typeof(type) === 'string' ? inputOptions : type,
               type = typeof(type) === 'string' ? type : (restrictToKnownPlugins ? undefined : 'default'),
