@@ -9,6 +9,8 @@
     def.moved = def.moved || function (){};
     def.click = def.click || function (){};
     def.dblclick = def.dblclick || function (){};
+    def.select = def.select || function (){};
+    def.deselect = def.deselect || function (){};
     if ( name ) {
       plugins[name] = def;
     } //if
@@ -104,6 +106,18 @@
         container.removeChild( track.getElement() );
         delete tracks[ track.getElement().id ];
         return track;
+      };
+
+      this.deselectOthers = function() {
+        for (var j in tracks) {
+          var events = tracks[j].getTrackEvents();
+          for (var i in events) {
+            if (events[i].selected) {
+              events[i].deselect();
+            } //if
+          } //for
+        } //for
+        return self;
       };
 
       this.plugins = plugins;
@@ -206,6 +220,18 @@
             trackEvent.trackId = trackId;
             //trackEvent.element = element;
 
+            trackEvent.selected = false;
+            trackEvent.select = function (e) {
+              self.deselectOthers();
+              trackEvent.selected = true;
+              plugins[ type ].select(trackEvent, null);
+            };
+
+            trackEvent.deselect = function (e) {
+              trackEvent.selected = false;
+              plugins[ type ].deselect(trackEvent, null);
+            };
+
             $( trackEvent.element ).draggable( { /*grid: [ 1, 36 ],*/ containment: parent, zIndex: 9001, scroll: true,
               // this is when an event stops being dragged
               start: function ( event, ui ) {
@@ -222,19 +248,20 @@
         };
 
         this.addTrackEvent = function( trackEvent ) {
-
           events[ trackEvent.element.id ] = trackEvent;
           element.appendChild( trackEvent.element );
           return this;
         };
 
         this.getTrackEvent = function( id ) {
-
           return events[ id ];
         };
 
-        this.removeTrackEvent = function( id ) {
+        this.getTrackEvents = function () {
+          return events;
+        };
 
+        this.removeTrackEvent = function( id ) {
           var trackEvent = events[ id ];
           delete events[ id ];
           element.removeChild( trackEvent.element );
@@ -278,13 +305,17 @@
       };
     },
     moved: function (trackEventObj, event, ui) {
-      console.log('moved!');
     },
     click: function (trackEventObj, event) {
-      console.log('click!');
+      trackEventObj.select();
     },
     dblclick: function (trackEventObj, event) {
-      console.log('dblclick!');
+    },
+    select: function (trackEventObj, event) {
+      trackEventObj.element.style.background = "-moz-linear-gradient(top,  #0f0,  #060)";
+    },
+    deselect: function (trackEventObj, event) {
+      trackEventObj.element.style.background = "-moz-linear-gradient(top,  #ff0,  #660)";
     },
   });
 
