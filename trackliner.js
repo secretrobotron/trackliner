@@ -155,12 +155,12 @@
                 parentId = ui.draggable[ 0 ].parentNode.id;
 
             if ( self.getTrack( parentId ) ) {
-              self.getTrack( trackId ).addTrackEvent( self.getTrack( parentId ).removeTrackEvent( eventId ) );
+              that.addTrackEvent( self.getTrack( parentId ).removeTrackEvent( eventId ) );
             }
             else {
 
               if ( type && plugins[ type ]) {
-                self.getTrack( trackId ).createTrackEvent( type, {left: event.clientX/scale}, event, ui );
+                that.createTrackEvent( type, {left: event.clientX/scale}, event, ui );
               } //if
 
             } //if
@@ -196,13 +196,9 @@
           if (pluginDef) {
 
             var trackOptions = plugins[ type ].setup( that, inputOptions, event, ui );
+
             var movedCallback = function( event, ui ) {
-
-              var eventElement = ui.helper[ 0 ],
-                  trackObject = self.getTrack( eventElement.parentNode.id ),
-                  trackElement = trackObject.getElement(),
-                  eventObject = trackObject.getTrackEvent( eventElement.id ).event;
-
+              var eventElement = trackEvent.element;
               eventElement.style.top = "0px";
               pluginDef.moved( trackEvent, event, ui );
             };
@@ -217,7 +213,6 @@
               pluginDef.dblclick( trackEvent, e );
             }, false);
             trackEvent.type = type;
-            trackEvent.trackId = trackId;
             //trackEvent.element = element;
 
             trackEvent.selected = false;
@@ -237,7 +232,11 @@
               start: function ( event, ui ) {
               },
               stop: movedCallback
-            }).resizable( { autoHide: true, containment: "parent", handles: 'e, w', scroll: false,
+            }).resizable({ 
+              autoHide: true, 
+              containment: "parent", 
+              handles: 'e, w', 
+              scroll: false,
               stop: movedCallback
             });
 
@@ -250,6 +249,7 @@
         this.addTrackEvent = function( trackEvent ) {
           events[ trackEvent.element.id ] = trackEvent;
           element.appendChild( trackEvent.element );
+          trackEvent.trackId = trackId;
           return this;
         };
 
