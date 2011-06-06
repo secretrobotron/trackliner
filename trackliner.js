@@ -57,6 +57,7 @@
                 newTrack = self.createTrack();
 
             if ( self.getTrack( parentId ) ) {
+
               newTrack.addTrackEvent( self.getTrack( parentId ).removeTrackEvent( eventId ) );
             } else {
               var clientRects = parent.getClientRects();
@@ -155,6 +156,7 @@
                 parentId = ui.draggable[ 0 ].parentNode.id;
 
             if ( self.getTrack( parentId ) ) {
+
               that.addTrackEvent( self.getTrack( parentId ).removeTrackEvent( eventId ) );
             }
             else {
@@ -190,6 +192,7 @@
         this.createTrackEvent = function( type, inputOptions, event, ui ) {
 
           var trackEvent = {},
+              that = this,
               eventId = "trackEvent" + eventCount++,
               inputOptions = typeof(type) === 'string' ? inputOptions : type,
               type = typeof(type) === 'string' ? type : (restrictToKnownPlugins ? undefined : 'default'),
@@ -204,13 +207,15 @@
             trackEvent.end += trackEvent.start;
 
             var movedCallback = function( event, ui ) {
-              var eventElement = trackEvent.element;
+              var eventElement = trackEvent.element,
+                  track = self.getTrack( this.parentNode.id );
               eventElement.style.top = "0px";
               trackEvent.start = $(eventElement).offset().left;
               trackEvent.end = $(eventElement).width() + trackEvent.start;
               trackEvent.start /= scale;
               trackEvent.end /= scale;
-              pluginDef.moved( that, trackEvent, event, ui );
+
+              pluginDef.moved( track, trackEvent, event, ui );
             };
 
             trackEvent.options = inputOptions;
@@ -218,10 +223,10 @@
             trackEvent.element = trackOptions.element || this.createEventElement ( trackOptions );
             trackEvent.element.id = eventId;
             trackEvent.element.addEventListener('click', function (e) {
-              pluginDef.click( that, trackEvent, e );
+              pluginDef.click( self.getTrack( this.parentNode.id ), trackEvent, e );
             }, false);
             trackEvent.element.addEventListener('dblclick', function (e) {
-              pluginDef.dblclick( that, trackEvent, e );
+              pluginDef.dblclick( self.getTrack( this.parentNode.id ), trackEvent, e );
             }, false);
             trackEvent.type = type;
             //trackEvent.element = element;
@@ -273,6 +278,7 @@
         };
 
         this.removeTrackEvent = function( id ) {
+
           var trackEvent = events[ id ];
           delete events[ id ];
           element.removeChild( trackEvent.element );
