@@ -24,7 +24,7 @@
         userElement,
         dynamicTrackCreation = options.dynamicTrackCreation,
         restrictToKnownPlugins = options.restrictToKnownPlugins,
-        duration = options && options.duration ? options.duration.duration : 1,
+        duration = options && options.duration ? options.duration : 1,
         scale = options && options.scale ? options.scale : 1,
         parent = document.createElement( "div" ),
         container = document.createElement( "div" ),
@@ -199,9 +199,18 @@
 
             var trackOptions = plugins[ type ].setup( that, inputOptions, event, ui );
 
+            trackEvent.start = inputOptions.left || 0;
+            trackEvent.end = inputOptions.width || 0;
+            trackEvent.end += trackEvent.start;
+
             var movedCallback = function( event, ui ) {
               var eventElement = trackEvent.element;
               eventElement.style.top = "0px";
+              trackEvent.start = $(eventElement).offset().left;
+              trackEvent.end = $(eventElement).width() + trackEvent.start;
+              trackEvent.start /= scale;
+              trackEvent.end /= scale;
+              console.log(trackEvent.start, trackEvent.end);
               pluginDef.moved( that, trackEvent, event, ui );
             };
 
