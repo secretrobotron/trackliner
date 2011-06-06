@@ -210,7 +210,6 @@
               trackEvent.end = $(eventElement).width() + trackEvent.start;
               trackEvent.start /= scale;
               trackEvent.end /= scale;
-              console.log(trackEvent.start, trackEvent.end);
               pluginDef.moved( that, trackEvent, event, ui );
             };
 
