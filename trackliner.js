@@ -160,7 +160,8 @@
             else {
 
               if ( type && plugins[ type ]) {
-                that.createTrackEvent( type, {left: event.clientX/scale}, event, ui );
+                var clientRects = parent.getClientRects();
+                that.createTrackEvent( type, { left: (event.clientX - clientRects[0].left)/scale }, event, ui );
               } //if
 
             } //if
