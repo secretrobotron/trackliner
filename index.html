@@ -3,7 +3,15 @@
     <script src="external/jquery.js"></script>
     <script src="external/jquery-ui.js"></script>
     <link rel="stylesheet" type="text/css" href="external/jquery-ui.css"/>
+    <link rel="stylesheet" type="text/css" href="trackliner.css"/>
     <script src="trackliner.js"></script>
+    <style>
+      .test-class {
+        cursor: pointer;
+        background-image: -moz-linear-gradient(top,  #00f,  #006);
+        background-image: -webkit-gradient(linear, left top, left bottom, from(#00f), to(#006));
+      }
+    </style>
     <script>
 
       document.addEventListener('DOMContentLoaded', function (e) {
@@ -17,9 +25,20 @@
           restrictToKnownPlugins: true,
         });
 
-        trackline.createTrack('Track1').createTrackEvent( 'default', { start: 1, end: 5, label: 'awesome', className: 'test' } );
-        trackline.createTrack('Track2').createTrackEvent( 'default', { start: 0, end: 2 } );
-        trackline.createTrack('Track3').createTrackEvent( 'default', { start: 4, end: 7 } );
+        trackline.createTrack('Track1').createTrackEvent( 'default', { start: 1, end: 5, label: 'awesome' } );
+        trackline.createTrack('Track2').createTrackEvent( 'default', { start: 0, end: 2,
+          classes: ['test-class'],
+        });
+        trackline.createTrack('Track3').createTrackEvent( 'default', { 
+          start: 4, 
+          end: 7,
+          css: {
+            font: '12pt Helvetica',
+            fontWeight: 'bold',
+            color: '#000',
+          },
+          label: 'LOL!',
+        });
         trackline.createTrack();
 
         var elems = document.getElementsByClassName('droppable');

@@ -139,9 +139,7 @@
             that = this,
             element = document.createElement( "div" );
 
-        element.style.background = "-moz-linear-gradient(top,  #eee,  #999)";
-        element.style.height = "36px";
-        element.style.position = "relative";
+        element.className = 'trackliner-track';
         element.id = trackId;
 
         $( element ).droppable( { 
@@ -176,16 +174,27 @@
 
         this.createEventElement = function ( options ) {
           var element = document.createElement('DIV');
-          element.style.cursor = options.cursor || "move";
-          element.style.background = options.backgroud || "-moz-linear-gradient(top,  #ff0,  #660)";
-          element.style.opacity = options.opacity || "0.5";
-          element.style.height = options.height || "100%";
-          element.style.width = options.width ? options.width*scale + "px" : "100px";
-          element.style.position = options.position || "absolute";
-          element.style.top = options.top || "0px";
-          element.style.left = options.left ? options.left*scale + "px" : "0px";
-          element.innerHTML = options.innerHTML || '';
-          element.className = options.className || '';
+
+          // set options if they exist
+          options.cursor && (element.style.cursor = options.cursor);
+          options.background && (element.style.background = options.background);
+          options.opacity && (element.style.opacity = options.opacity);
+          options.height && (element.style.height = options.height);
+          options.width && (element.style.width = options.width*scale + "px");
+          options.position && (element.style.position = options.position);
+          options.top && (element.style.top = options.top);
+          options.left && (element.style.left = options.left*scale + "px");
+          options.innerHTML && (element.innerHTML = options.innerHTML);
+
+          // add css options if they exist
+          if ( options.css ) {
+            $(element).css( options.css );
+          } //if
+
+          element.className = 'trackliner-event';
+          for ( var i=0; i<options.classes.length; ++i) {
+            $(element).addClass(options.classes[i]);
+          } //for
           return element;
         } //createEventElement
 
@@ -318,7 +327,8 @@
         left: left,
         width: width,
         innerHTML: options.label || '',
-        className: options.className || '',
+        classes: options.classes || '',
+        css: options.css,
       };
     },
     moved: function (track, trackEventObj, event, ui) {
@@ -329,10 +339,10 @@
     dblclick: function (track, trackEventObj, event) {
     },
     select: function (track, trackEventObj, event) {
-      trackEventObj.element.style.background = "-moz-linear-gradient(top,  #0f0,  #060)";
+      $(trackEventObj.element).addClass('trackliner-event-selected');
     },
     deselect: function (track, trackEventObj, event) {
-      trackEventObj.element.style.background = "-moz-linear-gradient(top,  #ff0,  #660)";
+      $(trackEventObj.element).removeClass('trackliner-event-selected');
     },
   });
 
