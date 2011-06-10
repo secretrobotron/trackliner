@@ -303,10 +303,11 @@
           return eventArray.length;
         };*/
 
-        this.toString = function() {
+        this.toString = this.id = function() {
 
           return trackId;
         };
+
       };
 
       /*this.length = function() {
