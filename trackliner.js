@@ -197,9 +197,13 @@
           } //if
 
           element.className = 'trackliner-event';
-          for ( var i=0; i<options.classes.length; ++i) {
-            $(element).addClass(options.classes[i]);
-          } //for
+
+
+          if (options.classes) {
+            for ( var i=0; i<options.classes.length; ++i) {
+              $(element).addClass(options.classes[i]);
+            } //for
+          } //if
           return element;
         } //createEventElement
 
