@@ -91,6 +91,11 @@
         return track;
       };
 
+      this.getTracks = function () {
+
+        return tracks;
+      };
+
       this.getTrack = function( id ) {
 
         return tracks[ id ];
