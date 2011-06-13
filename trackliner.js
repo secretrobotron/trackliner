@@ -68,6 +68,15 @@
         }
       });
 
+      this.clear = function () {
+        while ( container.children.length ) {
+          container.removeChild( container.children[0] );
+        } //while
+        tracks = [];
+        trackCount = 0;
+        eventCount = 0;
+      };
+
       this.createTrack = function( name ) {
 
         //index = ~index || ~trackArray.length;
