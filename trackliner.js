@@ -222,14 +222,13 @@
             $(element).css( options.css );
           } //if
 
-          element.className = 'trackliner-event';
-
-
           if (options.classes) {
             for ( var i=0; i<options.classes.length; ++i) {
               $(element).addClass(options.classes[i]);
             } //for
           } //if
+          $(element).addClass('trackliner-event');
+
           return element;
         } //createEventElement
 
