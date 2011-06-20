@@ -139,11 +139,12 @@
 
       this.plugin = addPlugin;
 
+      this.scale = 1;
       this.setScale = function ( scale ) {
         userElement.style.width = duration * scale + "px";
         userElement.style.minWidth = duration * scale + "px";
+        this.scale = scale;
       };
-
       this.setScale(scale);
 
       var Track = function( name, type ) {
