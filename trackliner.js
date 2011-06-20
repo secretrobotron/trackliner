@@ -274,14 +274,24 @@
               pluginDef.moved( track, trackEvent, event, ui );
             };
 
+            trackEvent.getExtents = function () {
+              trackEvent.start = $(trackEvent.element).position().left;
+              trackEvent.end = $(trackEvent.element).width() + trackEvent.start;
+              trackEvent.start /= scale;
+              trackEvent.end /= scale;
+              return { start: trackEvent.start, end: trackEvent.end };
+            };
+
             trackEvent.options = inputOptions;
             trackEvent.pluginOptions = trackOptions;
             trackEvent.element = trackOptions.element || this.createEventElement ( trackOptions );
             trackEvent.element.id = eventId;
             trackEvent.element.addEventListener('click', function (e) {
+              trackEvent.getExtents();
               pluginDef.click( self.getTrack( this.parentNode.id ), trackEvent, e );
             }, false);
             trackEvent.element.addEventListener('dblclick', function (e) {
+              trackEvent.getExtents();
               pluginDef.dblclick( self.getTrack( this.parentNode.id ), trackEvent, e );
             }, false);
             trackEvent.type = type;
@@ -291,11 +301,13 @@
             trackEvent.select = function (e) {
               self.deselectOthers();
               trackEvent.selected = true;
+              trackEvent.getExtents();
               plugins[ type ].select(that, trackEvent, null);
             };
 
             trackEvent.deselect = function (e) {
               trackEvent.selected = false;
+              trackEvent.getExtents();
               plugins[ type ].deselect(that, trackEvent, null);
             };
 
@@ -312,10 +324,7 @@
               stop: movedCallback
             });
 
-            trackEvent.start = $(trackEvent.element).position().left;
-            trackEvent.end = $(trackEvent.element).width() + trackEvent.start;
-            trackEvent.start /= scale;
-            trackEvent.end /= scale;
+            trackEvent.getExtents();
 
             this.addTrackEvent( trackEvent );
 
