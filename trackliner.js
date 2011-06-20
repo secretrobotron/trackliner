@@ -312,8 +312,8 @@
               stop: movedCallback
             });
 
-            trackEvent.start = $(eventElement).position().left;
-            trackEvent.end = $(eventElement).width() + trackEvent.start;
+            trackEvent.start = $(trackEvent.element).position().left;
+            trackEvent.end = $(trackEvent.element).width() + trackEvent.start;
             trackEvent.start /= scale;
             trackEvent.end /= scale;
 
