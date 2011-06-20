@@ -266,7 +266,7 @@
               var eventElement = trackEvent.element,
                   track = self.getTrack( this.parentNode.id );
               eventElement.style.top = "0px";
-              trackEvent.start = $(eventElement).offset().left;
+              trackEvent.start = $(eventElement).position().left;
               trackEvent.end = $(eventElement).width() + trackEvent.start;
               trackEvent.start /= scale;
               trackEvent.end /= scale;
