@@ -180,7 +180,12 @@
 
             if ( self.getTrack( parentId ) ) {
 
-              that.addTrackEvent( self.getTrack( parentId ).removeTrackEvent( eventId ) );
+              var track = self.getTrack( parentId ),
+                  trackEvent = track.getTrackEvent( eventId );
+
+              if ( pluginType && trackEvent.type === pluginType ) {
+                that.addTrackEvent( track.removeTrackEvent( eventId ) );
+              } //if
             }
             else {
 
