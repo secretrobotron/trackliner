@@ -25,11 +25,11 @@
           restrictToKnownPlugins: true,
         });
 
-        trackline.createTrack('Track1').createTrackEvent( 'default', { start: 1, end: 5, label: 'awesome' } );
-        trackline.createTrack('Track2').createTrackEvent( 'default', { start: 0, end: 2,
+        trackline.createTrack('Should\'t Work').createTrackEvent( 'default', { start: 1, end: 5, label: 'awesome' } );
+        trackline.createTrack('Should Work 1', 'default').createTrackEvent( { start: 0, end: 2,
           classes: ['test-class'],
         });
-        trackline.createTrack('Track3').createTrackEvent( 'default', { 
+        trackline.createTrack('Should Work 2', 'default').createTrackEvent( 'default', { 
           start: 4, 
           end: 7,
           css: {

@@ -77,10 +77,10 @@
         eventCount = 0;
       };
 
-      this.createTrack = function( name ) {
+      this.createTrack = function( name, type ) {
 
         //index = ~index || ~trackArray.length;
-        var track = new Track(),
+        var track = new Track( name, type ),
             element = track.getElement();
         
         container.appendChild( element );
@@ -146,12 +146,23 @@
 
       this.setScale(scale);
 
-      var Track = function(inc) {
+      var Track = function( name, type ) {
 
         var trackId = "trackLiner" + trackCount++,
             events = {},
             that = this,
-            element = document.createElement( "div" );
+            element = document.createElement( "div" ),
+            pluginType = typeof(type) === 'string' ? (restrictToKnownPlugins && plugins[ type ] ? type : undefined) : (restrictToKnownPlugins ? undefined : 'default'),
+            pluginDef = plugins[ type ],
+            name = name || trackId;
+
+        this.name = function () {
+          return name;
+        }; //name
+
+        this.type = function () {
+          return pluginType;
+        };
 
         element.className = 'trackliner-track';
         element.id = trackId;
@@ -222,9 +233,20 @@
           var trackEvent = {},
               eventId = "trackEvent" + eventCount++,
               inputOptions = typeof(type) === 'string' ? inputOptions : type,
-              type = typeof(type) === 'string' ? type : (restrictToKnownPlugins ? undefined : 'default'),
-              pluginDef = plugins[ type ];
-              
+              pluginDef;
+
+          if ( pluginType ) {
+            type = ( pluginType === type || typeof( type ) === 'object' ) ? pluginType : undefined;
+          }
+          else if ( restrictToKnownPlugins ) {
+            type = undefined;
+          }
+          else {
+            type = 'default';
+          } //if 
+
+          pluginDef = plugins[ type ];
+
           if (pluginDef) {
 
             var trackOptions = plugins[ type ].setup( that, inputOptions, event, ui );
