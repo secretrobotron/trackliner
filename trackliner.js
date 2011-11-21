@@ -6,6 +6,7 @@
 
   function addPlugin ( name, def ) {
     def.setup = def.setup || function (){};
+    def.created = def.created || function (){};
     def.moved = def.moved || function (){};
     def.click = def.click || function (){};
     def.dblclick = def.dblclick || function (){};
@@ -326,6 +327,7 @@
 
             trackEvent.getExtents();
 
+            pluginDef.created( that, trackEvent, event, ui );
             this.addTrackEvent( trackEvent );
 
             return this;
