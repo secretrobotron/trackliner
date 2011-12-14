@@ -2,103 +2,220 @@
   //<script src="http://code.jquery.com/jquery-1.5.js"></script>
   //<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/jquery-ui.js"></script>
 
-  var plugins = {};
+  var Logger = function( name ) {
 
-  function addPlugin ( name, def ) {
-    def.setup = def.setup || function (){};
-    def.created = def.created || function (){};
-    def.moved = def.moved || function (){};
-    def.click = def.click || function (){};
-    def.dblclick = def.dblclick || function (){};
-    def.select = def.select || function (){};
-    def.deselect = def.deselect || function (){};
-    if ( name ) {
-      plugins[name] = def;
-    } //if
-  } //addPlugin
+    this.log = function( message ) {
+      console.log( "[" + name + "] " + message );
+    }; //log
+
+    this.error = function( message ) {
+      throw new Error( "[" + name + "]" + message ); 
+    }; //error
+
+  }; //Logger
+
+  var EventManager = function( emOptions ) {
+
+    var listeners = {},
+        related = {},
+        id = "EventManager" + EventManager.guid++,
+        logger = emOptions.logger || new Logger( id ),
+        targetName = id,
+        that = this;
+    
+    this.listen = function( type, listener, relatedObject ) {
+      if ( type && listener ) {
+        if ( !listeners[ type ] ) {
+          listeners[ type ] = [];
+        } //if
+        listeners[ type ].push( listener );
+        if ( relatedObject ) {
+          if ( !related[ relatedObject ] ) {
+            related[ relatedObject ] = [];
+          } //if
+          related[ relatedObject ].push( listener );
+        } //if
+      }
+      else {
+        logger.error( "type and listener required to listen for event." );
+      } //if
+    }; //listen
+
+    this.unlisten = function( type, listener ) {
+      if ( type && listener ) {
+        var theseListeners = listeners[ type ];
+        if ( theseListeners ) {
+          var idx = theseListeners.indexOf( listener );
+          if ( idx > -1 ) {
+            theseListeners.splice( idx, 1 );
+          } //if
+        } //if
+      }
+      else if ( type ) {
+        if ( listeners[ type ] ) {
+          listeners[ type ] = [];
+        } //if
+      }
+      else {
+        logger.error( "type and listener required to unlisten for event" );
+      } //if
+    }; //unlisten
+
+    this.unlistenByType = function( type, relatedObject ) {
+      var relatedListeners = related[ relatedObject ];
+      for ( var i=0, l=relatedListeners; i<l; ++i ) {
+        that.unlisten( type, relatedListeners[ i ] );
+      } //for
+      delete related[ relatedObject ];
+    }; //unlistenByType
+
+    this.dispatch = function( type, data, tempTarget ) {
+      if ( type ) {
+        var theseListeners = listeners[ type ];
+        if ( theseListeners ) {
+          var e = {
+            target: tempTarget || targetName,
+            type: type,
+            data: data
+          };
+          for ( var i=0, l=theseListeners.length; i<l; ++i ) {
+            theseListeners[ i ]( e );
+          } //for
+        } //if
+      }
+      else {
+        logger.error( "type required to dispatch event" );
+      } //if
+    }; //dispatch
+
+    this.apply = function( name, to ) {
+      to.listen = that.listen;
+      to.unlisten = that.unlisten;
+      to.dispatch = that.dispatch;
+      targetName = name;
+    }; //apply
+
+    this.repeat = function( e ) {
+      that.dispatch( e.type, e.data, e.target );
+    }; //repeat
+
+  }; //EventManager
+  EventManager.guid = 0;
 
   var TrackLiner = this.TrackLiner = function( options ) {
 
-    var tracks = {},
-        trackCount = 0,
-        eventCount = 0,
-        userElement,
-        dynamicTrackCreation = options.dynamicTrackCreation,
-        restrictToKnownPlugins = options.restrictToKnownPlugins,
-        duration = options && options.duration ? options.duration : 1,
-        scale = options && options.scale ? options.scale : 1,
-        parent = document.createElement( "div" ),
-        container = document.createElement( "div" ),
-        self = this;
-
     if ( this !== window ) {
 
-      if ( typeof(options) === 'string' ) {
-        userElement = document.getElementById(options);
+      options = options || {};
+
+      var tracks = {},
+          trackCount = 0,
+          eventCount = 0,
+          userElement,
+          dynamicTrackCreation = options.dynamicTrackCreation,
+          duration = options.duration || 1,
+          scale = options.scale || 1,
+          parent = document.createElement( "div" ),
+          container = document.createElement( "div" ),
+          self = this;
+
+      var eventManager = new EventManager({});
+      eventManager.apply( "trackLiner", this );
+
+      if ( typeof( options ) === "string" ) {
+
+        userElement = document.getElementById( options );
       }
       else {
-        userElement = document.getElementById(options.element);
+
+        userElement = document.getElementById( options.element ) || options.element;
       } //if
 
       userElement.appendChild( parent );
       parent.style.height = "100%";
       parent.appendChild( container );
 
-      $( container ).sortable( { containment: "parent", tolerance: 'pointer' } ).droppable( { greedy: true } );
+      $( container ).sortable({
+        containment: "parent",
+        tolerance: "pointer",
+        update: function( event, ui ) {
+
+          eventManager.dispatch( "trackupdated", {
+            track: self.getTrack( ui.item[ 0 ].id ),
+            index: ui.item.index()
+          });
+        }
+      }).droppable({
+        greedy: true
+      });
+
+      var trackEventDropped = function ( track, e, ui ) {
+
+        var eventId = ui.draggable[ 0 ].id,
+            trackId = track.id,
+            parentId = ui.draggable[ 0 ].parentNode.id,
+            parentTrack = self.getTrack( parentId );
+
+        if ( parentTrack ) {
+
+          trackId !== parentId && track.addTrackEvent( self.getTrack( parentId ).removeTrackEvent( eventId ) );
+        } else {
+
+          var clientRects = parent.getClientRects();
+
+          track.addTrackEvent( track.createTrackEvent({
+              left: ( e.clientX - clientRects[ 0 ].left ) / scale,
+              width: 50,
+              innerHTML: ui.draggable[ 0 ].innerHTML
+            }), true );
+        } //if
+      };
 
       $( parent ).droppable({
         // this is dropping an event on empty space
         drop: function( event, ui ) {
   
           if ( dynamicTrackCreation && ui.draggable[ 0 ].className.indexOf( "ui-draggable" ) > -1 ) {
-  
-            var eventId = ui.draggable[ 0 ].id,
-                type = ui.draggable[ 0 ].getAttribute('data-trackliner-type'),
-                parentId = ui.draggable[ 0 ].parentNode.id,
-                newTrack = self.createTrack();
 
-            if ( self.getTrack( parentId ) ) {
+            var newTrack = self.createTrack();
+            self.addTrack( newTrack );
 
-              newTrack.addTrackEvent( self.getTrack( parentId ).removeTrackEvent( eventId ) );
-            } else {
-              var clientRects = parent.getClientRects();
-              newTrack.createTrackEvent( type, { left: (event.clientX - clientRects[0].left)/scale }, event, ui );
-            } //if
-
+            trackEventDropped( newTrack, event, ui );
           } //if
         }
       });
 
       this.clear = function () {
+
         while ( container.children.length ) {
-          container.removeChild( container.children[0] );
+
+          container.removeChild( container.children[ 0 ] );
         } //while
+
         tracks = [];
         trackCount = 0;
         eventCount = 0;
       };
 
-      this.createTrack = function( name, type ) {
+      this.createTrack = function( name ) {
 
-        //index = ~index || ~trackArray.length;
-        var track = new Track( name, type ),
+        var track = new Track(),
             element = track.getElement();
-        
-        container.appendChild( element );
 
         if ( name ) {
-          var titleElement = document.createElement('span');
-          titleElement.style.postion = 'absolute';
-          titleElement.style.left = '5px';
-          titleElement.style.top = '50%';
+
+          var titleElement = document.createElement( "span" );
+
+          titleElement.style.postion = "absolute";
+          titleElement.style.left = "5px";
+          titleElement.style.top = "50%";
           titleElement.innerHTML = name;
-          titleElement.className = 'track-title';
+          titleElement.className = "track-title";
           
           element.appendChild( titleElement );
         } //if
 
-        tracks[ track.getElement().id ] = track;//.splice( ~index, 0, track );
-        return track;
+        return tracks[ track.getElement().id ] = track;
       };
 
       this.getTracks = function () {
@@ -115,99 +232,74 @@
 
         container.appendChild( track.getElement() );
         tracks[ track.getElement().id ] = track;
+        eventManager.dispatch( "trackadded", {
+          track: track
+        });
       };
 
       this.removeTrack = function( track ) {
 
         container.removeChild( track.getElement() );
         delete tracks[ track.getElement().id ];
+        eventManager.dispatch( "trackremoved", {
+          track: track
+        });
         return track;
       };
 
       this.deselectOthers = function() {
-        for (var j in tracks) {
-          var events = tracks[j].getTrackEvents();
-          for (var i in events) {
-            if (events[i].selected) {
-              events[i].deselect();
+
+        for ( var j in tracks ) {
+
+          var events = tracks[ j ].getTrackEvents();
+
+          for ( var i in events ) {
+
+            if ( events[ i ].selected ) {
+
+              events[ i ].deselect();
             } //if
           } //for
         } //for
+
         return self;
       };
 
-      this.plugins = plugins;
+      this.setScale = function ( scale ) {
 
-      this.plugin = addPlugin;
-
-      this.scale = function ( s ) {
-        if ( s ) {
-          userElement.style.width = duration * s + "px";
-          userElement.style.minWidth = duration * s + "px";
-          scale = s;
-        } //if
-        return scale;
+        userElement.style.width = userElement.style.width || duration * scale + "px";
+        userElement.style.minWidth = duration * scale + "px";
       };
-      this.scale(scale);
 
-      var Track = function( name, type ) {
+      this.setScale( scale );
+
+      var Track = function( inc ) {
 
         var trackId = "trackLiner" + trackCount++,
             events = {},
             that = this,
-            element = document.createElement( "div" ),
-            pluginType = typeof(type) === 'string' ? (restrictToKnownPlugins && plugins[ type ] ? type : undefined) : (restrictToKnownPlugins ? undefined : 'default'),
-            pluginDef = plugins[ type ],
-            name = name || trackId;
+            element = document.createElement( "div" );
 
-        this.name = function () {
-          return name;
-        }; //name
+        element.className = "trackliner-track";
+        this.id = element.id = trackId;
 
-        this.type = function () {
-          return pluginType;
-        };
-
-        element.className = 'trackliner-track';
-        element.id = trackId;
-
-        $( element ).droppable( { 
+        $( element ).droppable({ 
           greedy: true,
-
           // this is dropping an event on a track
           drop: function( event, ui ) {
 
-            var eventId = ui.draggable[ 0 ].id,
-                trackId = this.id,
-                type = ui.draggable[ 0 ].getAttribute('data-trackliner-type'),
-                parentId = ui.draggable[ 0 ].parentNode.id;
-
-            if ( self.getTrack( parentId ) ) {
-
-              var track = self.getTrack( parentId ),
-                  trackEvent = track.getTrackEvent( eventId );
-
-              if ( pluginType && trackEvent.type === pluginType ) {
-                that.addTrackEvent( track.removeTrackEvent( eventId ) );
-              } //if
-            }
-            else {
-
-              if ( type && plugins[ type ]) {
-                var clientRects = parent.getClientRects();
-                that.createTrackEvent( type, { left: (event.clientX - clientRects[0].left)/scale }, event, ui );
-              } //if
-
-            } //if
+            trackEventDropped( that, event, ui );
           }
         });
 
         this.getElement = function() {
+
           return element;
         };
 
         this.createEventElement = function ( options ) {
-          var element = document.createElement('DIV');
+
+          var element = document.createElement( "div" );
 
           // set options if they exist
           options.cursor && (element.style.cursor = options.cursor);
@@ -215,201 +307,185 @@
           options.opacity && (element.style.opacity = options.opacity);
           options.height && (element.style.height = options.height);
           options.width && (element.style.width = options.width*scale + "px");
+          options.position && (element.style.position = options.position);
           options.top && (element.style.top = options.top);
           options.left && (element.style.left = options.left*scale + "px");
           options.innerHTML && (element.innerHTML = options.innerHTML);
-
-          element.style.position = options.position ? options.position : 'absolute';
+          element.style.position = options.position ? options.position : "absolute";
 
           // add css options if they exist
           if ( options.css ) {
-            $(element).css( options.css );
+
+            $( element ).css( options.css );
           } //if
 
-          if (options.classes) {
-            for ( var i=0; i<options.classes.length; ++i) {
-              $(element).addClass(options.classes[i]);
+          element.className = "trackliner-event";
+
+          if ( options.classes ) {
+
+            for ( var i = 0; i < options.classes.length; ++i ) {
+
+              $( element ).addClass( options.classes[ i ] );
             } //for
           } //if
-          $(element).addClass('trackliner-event');
 
           return element;
         } //createEventElement
 
-        this.createTrackEvent = function( type, inputOptions, event, ui ) {
+        this.createTrackEvent = function( inputOptions ) {
 
           var trackEvent = {},
-              eventId = "trackEvent" + eventCount++,
-              inputOptions = typeof(type) === 'string' ? inputOptions : type,
-              pluginDef;
+              eventId = "trackEvent" + eventCount++;
 
-          if ( pluginType ) {
-            type = ( pluginType === type || typeof( type ) === 'object' ) ? pluginType : undefined;
-          }
-          else if ( restrictToKnownPlugins ) {
-            type = undefined;
-          }
-          else {
-            type = 'default';
-          } //if 
-
-          pluginDef = plugins[ type ];
-
-          if (pluginDef) {
-
-            var trackOptions = plugins[ type ].setup( that, inputOptions, event, ui );
-
-            trackEvent.start = inputOptions.left || 0;
-            trackEvent.end = inputOptions.width || 0;
-            trackEvent.end += trackEvent.start;
+          if ( inputOptions ) {
 
             var movedCallback = function( event, ui ) {
+
               var eventElement = trackEvent.element,
                   track = self.getTrack( this.parentNode.id );
+
               eventElement.style.top = "0px";
-              trackEvent.start = $(eventElement).position().left;
-              trackEvent.end = $(eventElement).width() + trackEvent.start;
-              trackEvent.start /= scale;
-              trackEvent.end /= scale;
 
-              pluginDef.moved( track, trackEvent, event, ui );
-            };
+              trackEvent.options.left = eventElement.offsetLeft;
+              trackEvent.options.width = eventElement.offsetWidth;
 
-            trackEvent.getExtents = function () {
-              trackEvent.start = $(trackEvent.element).position().left;
-              trackEvent.end = $(trackEvent.element).width() + trackEvent.start;
-              trackEvent.start /= scale;
-              trackEvent.end /= scale;
-              return { start: trackEvent.start, end: trackEvent.end };
+              eventManager.dispatch( "trackeventupdated", {
+                track: track,
+                trackEvent: trackEvent,
+                ui: true
+              });
             };
 
             trackEvent.options = inputOptions;
-            trackEvent.pluginOptions = trackOptions;
-            trackEvent.element = trackOptions.element || this.createEventElement ( trackOptions );
+
+            trackEvent.element = inputOptions.element || this.createEventElement ( inputOptions );
             trackEvent.element.id = eventId;
-            trackEvent.element.addEventListener('click', function (e) {
-              trackEvent.getExtents();
-              pluginDef.click( self.getTrack( this.parentNode.id ), trackEvent, e );
-            }, false);
-            trackEvent.element.addEventListener('dblclick', function (e) {
-              trackEvent.getExtents();
-              pluginDef.dblclick( self.getTrack( this.parentNode.id ), trackEvent, e );
-            }, false);
-            trackEvent.type = type;
-            //trackEvent.element = element;
+            trackEvent.element.style.top = "0px";
 
             trackEvent.selected = false;
-            trackEvent.select = function (e) {
+            trackEvent.select = function ( e ) {
+
               self.deselectOthers();
               trackEvent.selected = true;
-              trackEvent.getExtents();
-              plugins[ type ].select(that, trackEvent, null);
+              eventManager.dispatch( "trackeventselected", {
+                track: that,
+                trackEvent: trackEvent
+              });
             };
 
-            trackEvent.deselect = function (e) {
+            trackEvent.deselect = function ( e ) {
+
               trackEvent.selected = false;
-              trackEvent.getExtents();
-              plugins[ type ].deselect(that, trackEvent, null);
+              eventManager.dispatch( "trackeventdeselected", {
+                track: that,
+                trackEvent: trackEvent
+              });
             };
+            
+            trackEvent.element.addEventListener( "click", function ( e ) {
 
-            $( trackEvent.element ).draggable( { /*grid: [ 1, 36 ],*/ containment: parent, zIndex: 9001, scroll: true,
+              eventManager.dispatch( "trackeventclicked", {
+                track: self.getTrack( this.parentNode.id ),
+                trackEvent: trackEvent,
+                event: e
+              });
+              trackEvent.select();
+            }, false);
+
+            trackEvent.element.addEventListener( "dblclick", function ( e ) {
+
+              eventManager.dispatch( "trackeventdoubleclicked", {
+                track: self.getTrack( this.parentNode.id ),
+                trackEvent: trackEvent,
+                event: e
+              });
+            }, false);
+
+            $( trackEvent.element ).draggable({
+              containment: parent,
+              zIndex: 9001,
+              scroll: true,
               // this is when an event stops being dragged
-              start: function ( event, ui ) {
-              },
+              start: function ( event, ui ) {},
               stop: movedCallback
             }).resizable({ 
               autoHide: true, 
               containment: "parent", 
-              handles: 'e, w', 
+              handles: "e, w", 
               scroll: false,
               stop: movedCallback
             });
 
-            trackEvent.getExtents();
-
-            pluginDef.created( that, trackEvent, event, ui );
-            this.addTrackEvent( trackEvent );
-
-            return this;
+            return trackEvent;
           } //if
         };
 
-        this.addTrackEvent = function( trackEvent ) {
+        this.addTrackEvent = function( trackEvent, ui ) {
+
           events[ trackEvent.element.id ] = trackEvent;
           element.appendChild( trackEvent.element );
           trackEvent.trackId = trackId;
-          return this;
+          ui = ui || false;
+
+          eventManager.dispatch( "trackeventadded", {
+            track: that,
+            trackEvent: trackEvent,
+            ui: ui
+          });
+
+          ui && trackEvent.select();
+          
+          return trackEvent;
+        };
+
+        this.updateTrackEvent = function( trackEvent ) {
+
+          var eventElement = trackEvent.element,
+              track = self.getTrack( trackEvent.trackId );
+
+          eventElement.style.top = "0px";
+          eventElement.style.width = trackEvent.options.width + "px";
+          eventElement.style.left = trackEvent.options.left + "px";
+
+          eventManager.dispatch( "trackeventupdated", {
+            track: track,
+            trackEvent: trackEvent,
+            ui: false
+          });
+
+          return trackEvent;
         };
 
         this.getTrackEvent = function( id ) {
+
           return events[ id ];
         };
 
         this.getTrackEvents = function () {
+
           return events;
         };
 
         this.removeTrackEvent = function( id ) {
 
           var trackEvent = events[ id ];
+
           delete events[ id ];
           element.removeChild( trackEvent.element );
+          eventManager.dispatch( "trackeventremoved", trackEvent );
+
           return trackEvent;
         };
-        
-        /*this.length = function() {
 
-          return eventArray.length;
-        };*/
-
-        this.toString = this.id = function() {
+        this.toString = function() {
 
           return trackId;
         };
-
       };
-
-      /*this.length = function() {
-
-        return trackArray.length;
-      };*/
 
       return this;
-
     } //if (this !== window)
-
   }; //TrackLiner
-
-  TrackLiner.plugin = addPlugin;
-
-  window.TrackLiner = TrackLiner;
-
-  TrackLiner.plugin( 'default', {
-    setup: function ( track, options, event, ui ) {
-      var left = options.left || options.x || options.start || 0;
-      var width = options.width || options.end ? options.end - left : 1;
-      return {
-        left: left,
-        width: width,
-        innerHTML: options.label || '',
-        classes: options.classes || '',
-        css: options.css,
-      };
-    },
-    moved: function (track, trackEventObj, event, ui) {
-    },
-    click: function (track, trackEventObj, event) {
-      trackEventObj.select();
-    },
-    dblclick: function (track, trackEventObj, event) {
-    },
-    select: function (track, trackEventObj, event) {
-      $(trackEventObj.element).addClass('trackliner-event-selected');
-    },
-    deselect: function (track, trackEventObj, event) {
-      $(trackEventObj.element).removeClass('trackliner-event-selected');
-    },
-  });
-
 }(window));
+
 
