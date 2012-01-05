@@ -15,31 +15,13 @@
     <script>
 
       document.addEventListener('DOMContentLoaded', function (e) {
-        var duration = 10; // seconds
 
         var trackline = new TrackLiner({
           element: "container",
-          scale: 100, //pixels
-          duration: duration,
-          dynamicTrackCreation: true,
-          restrictToKnownPlugins: true,
+          dynamicTrackCreation: true
         });
-
-        trackline.createTrack('Should\'t Work').createTrackEvent( 'default', { start: 1, end: 5, label: 'awesome' } );
-        trackline.createTrack('Should Work 1', 'default').createTrackEvent( { start: 0, end: 2,
-          classes: ['test-class'],
-        });
-        trackline.createTrack('Should Work 2', 'default').createTrackEvent( 'default', { 
-          start: 4, 
-          end: 7,
-          css: {
-            font: '12pt Helvetica',
-            fontWeight: 'bold',
-            color: '#000',
-          },
-          label: 'LOL!',
-        });
-        trackline.createTrack();
+        
+        trackline.addTrack( trackline.createTrack() );
 
         var elems = document.getElementsByClassName('droppable');
         for (var i=0; i<elems.length; ++i) {
@@ -64,11 +46,10 @@
     </style>
   </head>
   <body>
-    <div id="container" style="height: 50%;">
+    <div id="container" style="width: 100%; height: 50%;">
     </div>
     <div id="droppables">
-      <div class="droppable" data-trackliner-type="default">Should Work</div>
-      <div class="droppable" data-trackliner-type="default2">Shouldn't Work</div>
+      <div class="droppable">Drag me!</div>
     </div>
   </body>
 </html>
