@@ -1,10 +1,10 @@
 <html>
   <head>
-    <script src="external/jquery.js"></script>
-    <script src="external/jquery-ui.js"></script>
-    <link rel="stylesheet" type="text/css" href="external/jquery-ui.css"/>
-    <link rel="stylesheet" type="text/css" href="trackliner.css"/>
-    <script src="trackliner.js"></script>
+    <script src="lib/jquery.js"></script>
+    <script src="lib/jquery-ui.js"></script>
+    <link rel="stylesheet" type="text/css" href="lib/jquery-ui.css"/>
+    <link rel="stylesheet" type="text/css" href="css/trackliner.css"/>
+    <script src="js/loader.js"></script>
     <style>
       .test-class {
         cursor: pointer;
@@ -14,14 +14,14 @@
     </style>
     <script>
 
-      document.addEventListener('DOMContentLoaded', function (e) {
+      trackliner( function(){
 
-        var trackline = new TrackLiner({
+        var tl = new trackliner.TrackLiner({
           element: "container",
           dynamicTrackCreation: true
         });
         
-        trackline.addTrack( trackline.createTrack() );
+        tl.addTrack( tl.createTrack() );
 
         var elems = document.getElementsByClassName('droppable');
         for (var i=0; i<elems.length; ++i) {
@@ -32,7 +32,7 @@
           });
         } //for
 
-      }, false);
+      });
 
     </script>
     <style>

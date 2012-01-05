@@ -1,0 +1,12 @@
+
+
+  define = oldDefine;
+
+  // Register with an AMD loader on the page, if it exists.
+  if ( typeof define === 'function' && define.amd ) {
+    define(function () {
+      return root.trackliner;
+    })
+  }
+
+}( this ));
